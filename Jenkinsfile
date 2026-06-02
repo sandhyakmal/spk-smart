@@ -76,7 +76,6 @@ pipeline {
                           --username "$DOCKERHUB_USERNAME" \
                           --password-stdin
 
-                        docker push ${DOCKERHUB_REPO}:${IMAGE_TAG}
                         docker push ${DOCKERHUB_REPO}:latest
 
                         docker logout
