@@ -31,16 +31,25 @@ RUN composer dump-autoload --optimize
 
 FROM php:8.3-fpm-alpine3.23
 
-RUN apk add --no-cache \
-    nginx \
-    curl \
-    bash \
-    icu-dev \
-    libzip-dev \
-    oniguruma-dev \
-    freetype-dev \
-    libjpeg-turbo-dev \
-    libpng-dev \
+RUN apk update && apk upgrade --no-cache \
+    && apk add --no-cache \
+        nginx \
+        curl \
+        bash \
+        icu-libs \
+        libzip \
+        oniguruma \
+        freetype \
+        libjpeg-turbo \
+        libpng \
+    && apk add --no-cache --virtual .build-deps \
+        $PHPIZE_DEPS \
+        icu-dev \
+        libzip-dev \
+        oniguruma-dev \
+        freetype-dev \
+        libjpeg-turbo-dev \
+        libpng-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
         pdo_mysql \
@@ -50,7 +59,10 @@ RUN apk add --no-cache \
         exif \
         intl \
         gd \
-        opcache
+        opcache \
+    && apk del .build-deps \
+    && apk del tar || true \
+    && rm -rf /var/cache/apk/*
 
 WORKDIR /var/www/html
 
