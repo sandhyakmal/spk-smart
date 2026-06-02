@@ -7,21 +7,36 @@ pipeline {
     }
 
     environment {
-        DOCKERHUB_REPO = 'andaraleonhart/laravel12-app'
-        IMAGE_TAG = "${env.BUILD_NUMBER}-${env.GIT_COMMIT.take(7)}"
+        PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Applications/Docker.app/Contents/Resources/bin:${env.PATH}"
+        DOCKERHUB_REPO = 'andaraleonhart/spk-smart'
     }
 
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
-                sh 'git rev-parse --short HEAD'
+
+                script {
+                    env.COMMIT_SHORT = sh(
+                        script: 'git rev-parse --short HEAD',
+                        returnStdout: true
+                    ).trim()
+
+                    env.IMAGE_TAG = "${env.BUILD_NUMBER}-${env.COMMIT_SHORT}"
+                }
+
+                sh '''
+                    echo "Commit: ${COMMIT_SHORT}"
+                    echo "Image tag: ${IMAGE_TAG}"
+                '''
             }
         }
 
         stage('Check Docker') {
             steps {
                 sh '''
+                    echo "PATH=$PATH"
+                    which docker
                     docker version
                     docker ps
                 '''
@@ -81,8 +96,8 @@ pipeline {
                 ]) {
                     sh '''
                         echo "$DOCKERHUB_TOKEN" | docker login \
-                        --username "$DOCKERHUB_USERNAME" \
-                        --password-stdin
+                          --username "$DOCKERHUB_USERNAME" \
+                          --password-stdin
 
                         docker push ${DOCKERHUB_REPO}:${IMAGE_TAG}
                         docker push ${DOCKERHUB_REPO}:latest
@@ -104,7 +119,10 @@ pipeline {
         }
 
         always {
-            sh 'docker image prune -f || true'
+            sh '''
+                docker rm -f laravel12-smoke || true
+                docker image prune -f || true
+            '''
         }
     }
 }
