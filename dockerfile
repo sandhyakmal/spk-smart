@@ -1,4 +1,4 @@
-FROM node:22-alpine AS assets
+FROM node:22-alpine3.23 AS assets
 
 WORKDIR /app
 
@@ -29,7 +29,7 @@ COPY . .
 RUN composer dump-autoload --optimize
 
 
-FROM php:8.3-fpm-alpine
+FROM php:8.3-fpm-alpine3.23
 
 RUN apk add --no-cache \
     nginx \
