@@ -11,3 +11,4 @@ storage/framework/views/*
 tests
 .DS_Store
 README.md
+Jenkinsfile
