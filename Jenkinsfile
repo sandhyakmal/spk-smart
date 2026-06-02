@@ -75,14 +75,14 @@ pipeline {
                 withCredentials([
                     usernamePassword(
                         credentialsId: 'dockerhub-creds',
-                        usernameVariable: 'andaraleonhart',
-                        passwordVariable: 'dckr_pat_xxuRrJ7qAXXY8UpGDKZO2T-VrvQ'
+                        usernameVariable: 'DOCKERHUB_USERNAME',
+                        passwordVariable: 'DOCKERHUB_TOKEN'
                     )
                 ]) {
                     sh '''
                         echo "$DOCKERHUB_TOKEN" | docker login \
-                          --username "$DOCKERHUB_USERNAME" \
-                          --password-stdin
+                        --username "$DOCKERHUB_USERNAME" \
+                        --password-stdin
 
                         docker push ${DOCKERHUB_REPO}:${IMAGE_TAG}
                         docker push ${DOCKERHUB_REPO}:latest
