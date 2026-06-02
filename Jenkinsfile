@@ -46,18 +46,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                    docker build \
-                      -t ${DOCKERHUB_REPO}:${IMAGE_TAG} \
-                      -t ${DOCKERHUB_REPO}:latest \
-                      .
-                '''
-            }
-        }
-
-        stage('Smoke Test Container') {
-            steps {
-                sh '''
-                    echo "Skip smoke test temporarily"
+                    docker build -t ${DOCKERHUB_REPO}:${IMAGE_TAG} .
                 '''
             }
         }
@@ -76,7 +65,7 @@ pipeline {
                           --username "$DOCKERHUB_USERNAME" \
                           --password-stdin
 
-                        docker push ${DOCKERHUB_REPO}:latest
+                        docker push ${DOCKERHUB_REPO}:${IMAGE_TAG}
 
                         docker logout
                     '''
@@ -92,13 +81,6 @@ pipeline {
 
         failure {
             echo "FAILED: Check Jenkins console log."
-        }
-
-        always {
-            sh '''
-                docker rm -f laravel12-smoke || true
-                docker image prune -f || true
-            '''
         }
     }
 }
